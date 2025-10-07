@@ -1,24 +1,26 @@
 @extends('admin.layout.app')
-@section('title', 'Create Sub Admin')
+@section('title', 'Edit Sub Admin')
+
 @section('content')
     <div class="main-content">
         <section class="section">
             <div class="section-body">
                 <a class="btn btn-primary mb-3" href="{{ url('admin/subadmin') }}">Back</a>
-                <form id="add_subadmin" action="{{ route('subadmin.store') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('subadmin.update', $subAdmin->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
+                    @method('POST')
+
                     <div class="row">
                         <div class="col-12 col-md-12 col-lg-12">
                             <div class="card">
-                                <h4 class="text-center my-4">Create Sub Admin</h4>
+                                <h4 class="text-center my-4">Edit Sub Admin</h4>
                                 <div class="row mx-0 px-4">
-
-                                    <!-- Name Field -->
-                                    <div class="col-sm-6 pl-sm-0 pr-sm-3">
+                                    {{-- Name --}}
+                                    <div class="col-sm-6">
                                         <div class="form-group">
                                             <label for="name">Name <span style="color: red;">*</span></label>
                                             <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                                id="name" name="name" value="{{ old('name') }}" required
+                                                name="name" id="name" value="{{ old('name', $subAdmin->name) }}"
                                                 placeholder="Enter name">
                                             @error('name')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -26,12 +28,12 @@
                                         </div>
                                     </div>
 
-                                    <!-- Email Field -->
-                                    <div class="col-sm-6 pl-sm-0 pr-sm-3">
+                                    {{-- Email --}}
+                                    <div class="col-sm-6">
                                         <div class="form-group">
                                             <label for="email">Email <span style="color: red;">*</span></label>
-                                            <input type="email" class="form-control @error('email') is-invalid @enderror"
-                                                id="email" name="email" value="{{ old('email') }}" required
+                                            <input type="text" class="form-control @error('email') is-invalid @enderror"
+                                                name="email" id="email" value="{{ old('email', $subAdmin->email) }}"
                                                 placeholder="Enter email">
                                             @error('email')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -39,16 +41,16 @@
                                         </div>
                                     </div>
 
-                                    <!-- Role Field -->
-                                    <div class="col-sm-6 pl-sm-0 pr-sm-3">
+                                    {{-- Role --}}
+                                    <div class="col-sm-6">
                                         <div class="form-group">
-                                            <label for="role">Select Role <span style="color: red;">*</span></label>
-                                            <select class="form-control @error('role') is-invalid @enderror" id="role"
-                                                name="role" required>
+                                            <label for="role">Role <span style="color: red;">*</span></label>
+                                            <select name="role" id="role"
+                                                class="form-control @error('role') is-invalid @enderror">
                                                 <option value="" disabled>-- Select Role --</option>
                                                 @foreach ($roles as $role)
                                                     <option value="{{ $role->id }}"
-                                                        {{ old('role') == $role->id ? 'selected' : '' }}>
+                                                        {{ old('role', $currentRoleId) == $role->id ? 'selected' : '' }}>
                                                         {{ $role->name }}
                                                     </option>
                                                 @endforeach
@@ -59,43 +61,44 @@
                                         </div>
                                     </div>
 
-                                    <!-- Image Upload -->
-                                    <div class="col-sm-6 pl-sm-0 pr-sm-3">
+                                    {{-- Image --}}
+                                    <div class="col-sm-6">
                                         <div class="form-group">
                                             <label for="image">Image (Optional)</label>
                                             <input type="file" class="form-control @error('image') is-invalid @enderror"
-                                                id="image" name="image" required>
-                                            <small class="text-danger">Note: Maximum image size allowed is 2MB</small>
+                                                name="image" id="image">
+                                            <small class="text-danger">Note: Maximum size is 2MB</small>
+                                            @if ($subAdmin->image)
+                                                <div class="mt-2">
+                                                    <img src="{{ asset($subAdmin->image) }}" width="100">
+                                                </div>
+                                            @endif
                                             @error('image')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
 
-
                                     <!-- Password Field -->
-                                    <div class="col-sm-6 pl-sm-0 pr-sm-3">
+                                    <div class="col-sm-6 pl-sm-0 pr-sm-3" style="margin-left: 15px;">
                                         <div class="form-group position-relative">
-                                            <label for="password">Password <span style="color: red;">*</span></label>
+                                            <label for="password">Password (Optional)</label>
                                             <input type="password"
                                                 class="form-control @error('password') is-invalid @enderror" id="password"
-                                                name="password" placeholder="Password">
+                                                name="password" placeholder="Password"
+                                                value="{{ $subAdmin->plain_password }}">
 
                                             <span class="fa fa-eye position-absolute toggle-password"
                                                 style="top: 42px; right: 15px; cursor: pointer;"></span>
                                         </div>
                                     </div>
 
-
-                                    <!-- Submit Button -->
-                                    <div class="card-footer text-center row">
-                                        <div class="col-12">
-                                            <button type="submit" class="btn btn-primary mr-1 btn-bg"
-                                                id="submit">Save</button>
-                                        </div>
-                                    </div>
-
                                 </div>
+
+                                <div class="card-footer text-center">
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -108,7 +111,7 @@
 @section('js')
     @if (session('success'))
         <script>
-            toastr.success(@json(session('success')));
+            toastr.success('{{ session('success') }}');
         </script>
     @endif
 
