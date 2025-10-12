@@ -61,24 +61,11 @@
                                     <!-- Section -->
                                     <div class="col-sm-6 pl-sm-0 pr-sm-3">
                                         <div class="form-group">
-                                            <label for="section">Section (Optional)</label>
+                                            <label for="section">Section <span style="color:red">*</span></label>
                                             <input type="text" name="section" id="section"
                                                 class="form-control @error('section') is-invalid @enderror"
                                                 value="{{ old('section') }}" placeholder="Enter section name e.g. Kitchen">
                                             @error('section')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <!-- Description -->
-                                    <div class="col-sm-12 pl-sm-0 pr-sm-3">
-                                        <div class="form-group">
-                                            <label for="description">Description (Optional)</label>
-                                            <textarea name="description" id="description" rows="3"
-                                                class="form-control @error('description') is-invalid @enderror"
-                                                placeholder="Add printer details here...">{{ old('description') }}</textarea>
-                                            @error('description')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>

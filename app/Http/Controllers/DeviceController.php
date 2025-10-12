@@ -5,35 +5,36 @@ namespace App\Http\Controllers;
 use App\Models\Printer;
 use Illuminate\Http\Request;
 
-class PrinterController extends Controller
+class DeviceController extends Controller
 {
-    /**
-     * Display a listing of the printers.
-     */
-    public function index()
+ public function index()
     {
         $printers = Printer::all();
-        return response()->json($printers);
+        return view('admin.printers.index', compact('printers'));
     }
 
     /**
      * Store a newly created printer in storage.
      */
+
+	public function create()
+	{
+		// Return a view for creating a printer (if using Blade templates)
+		return view('admin.printers.create');
+	}
+	
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|unique:printers,name|max:255',
             'type' => 'required|in:windows,network,serial,linux_usb',
             'connector_value' => 'required|string|max:255',
-            'section' => 'nullable|string|max:255',
+            'section' => 'required|string|max:255',
             'is_active' => 'boolean'
         ]);
 
         $printer = Printer::create($request->all());
-        return response()->json([
-            'message' => 'Printer created successfully!',
-            'data' => $printer
-        ], 201);
+       return redirect('/printers')->with('success', 'Printer created successfully!');
     }
 
     /**
@@ -44,6 +45,11 @@ class PrinterController extends Controller
         $printer = Printer::findOrFail($id);
         return response()->json($printer);
     }
+
+	public function edit($id) {
+	$printer = Printer::findOrFail($id);
+	return view('admin.printers.edit', compact('printer'));
+	}
 
     /**
      * Update the specified printer.
@@ -56,16 +62,13 @@ class PrinterController extends Controller
             'name' => 'sometimes|required|unique:printers,name,' . $printer->id,
             'type' => 'sometimes|required|in:windows,network,serial,linux_usb',
             'connector_value' => 'sometimes|required|string|max:255',
-            'section' => 'nullable|string|max:255',
+            'section' => 'required|string|max:255',
             'is_active' => 'boolean'
         ]);
 
         $printer->update($request->all());
 
-        return response()->json([
-            'message' => 'Printer updated successfully!',
-            'data' => $printer
-        ]);
+     return redirect('admin/printers')->with('success', 'Printer updated successfully!');
     }
 
     /**
@@ -76,7 +79,7 @@ class PrinterController extends Controller
         $printer = Printer::findOrFail($id);
         $printer->delete();
 
-        return response()->json(['message' => 'Printer deleted successfully!']);
+     return redirect('admin/printers')->with('success', 'Printer deleted successfully!');
     }
 
 	public function toggleStatus(Request $request)

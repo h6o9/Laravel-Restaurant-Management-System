@@ -8,7 +8,7 @@
             <div class="card">
                 <div class="card-header">
                     <h4>Printers</h4>
-                    <a href="{{ route('printer.create') }}" class="btn btn-primary ml-auto">Add Printer</a>
+                    <a href="{{ route('printers.create') }}" class="btn btn-primary ml-auto">Add Printer</a>
                 </div>
 
                 <div class="card-body table-responsive">
@@ -47,11 +47,11 @@
                                     <td>{{ $printer->created_at ? $printer->created_at->format('d M Y') : '—' }}</td>
                                     <td>
                                         <div class="d-flex">
-                                            <a href="{{ route('printer.edit', $printer->id) }}"
+                                            <a href="{{ route('printers.edit', $printer->id) }}"
                                                 class="btn btn-sm btn-primary mr-2">
                                                 <i class="fa fa-edit"></i>
                                             </a>
-                                            <form action="{{ route('printer.destroy', $printer->id) }}"
+                                            <form action="{{ route('printers.destroy', $printer->id) }}"
                                                   method="POST" id="delete-form-{{ $printer->id }}">
                                                 @csrf
                                                 @method('DELETE')
@@ -105,7 +105,7 @@ $(document).ready(function() {
         let $description = $(this).closest('.custom-switch').find('.custom-switch-description');
 
         $.ajax({
-            url: "{{ route('admin.printer.toggleStatus') }}",
+            url: "{{ route('printers.toggleStatus') }}",
             type: "POST",
             data: {
                 _token: "{{ csrf_token() }}",

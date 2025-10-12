@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Models\Printer;
 use App\Models\Section;
 
 class OrderTokenController extends Controller
@@ -16,10 +17,22 @@ class OrderTokenController extends Controller
         return view('admin.orders.index', compact('orders'));
     }
 
-    public function create()
-    {
-        return view('admin.orders.create');
-    }
+   public function create()
+{
+    // Printers table se unique section names nikalo (null ya empty exclude karo)
+    $sections = Printer::whereNotNull('section')
+        ->where('section', '!=', '')
+        ->select('section')
+        ->distinct()
+        ->get();
+
+		$menuItems = [
+    (object)['id' => 1, 'name' => 'Burger'],
+    (object)['id' => 2, 'name' => 'Pizza'],
+    (object)['id' => 3, 'name' => 'Pasta'],
+];
+    return view('admin.orders.create', compact('sections', 'menuItems'));
+}
 
 
 	public function store(Request $request)

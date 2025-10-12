@@ -1,104 +1,85 @@
 @extends('admin.layout.app')
-@section('title', 'Edit Sub Admin')
+@section('title', 'Edit Printer')
 
 @section('content')
     <div class="main-content">
         <section class="section">
             <div class="section-body">
-                <a class="btn btn-primary mb-3" href="{{ url('admin/subadmin') }}">Back</a>
-                <form action="{{ route('subadmin.update', $subAdmin->id) }}" method="POST" enctype="multipart/form-data">
+                <a class="btn btn-primary mb-3" href="{{ url('admin/printers') }}">Back</a>
+                <form action="{{ route('printers.update', $printer->id) }}" method="POST">
                     @csrf
-                    @method('POST')
+                    @method('PUT')
 
                     <div class="row">
                         <div class="col-12 col-md-12 col-lg-12">
                             <div class="card">
-                                <h4 class="text-center my-4">Edit Sub Admin</h4>
+                                <h4 class="text-center my-4">Edit Printer</h4>
                                 <div class="row mx-0 px-4">
-                                    {{-- Name --}}
-                                    <div class="col-sm-6">
+
+                                    <!-- Printer Name -->
+                                    <div class="col-sm-6 pl-sm-0 pr-sm-3">
                                         <div class="form-group">
-                                            <label for="name">Name <span style="color: red;">*</span></label>
-                                            <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                                name="name" id="name" value="{{ old('name', $subAdmin->name) }}"
-                                                placeholder="Enter name">
+                                            <label for="name">Printer Name <span style="color:red">*</span></label>
+                                            <input type="text" name="name" id="name"
+                                                class="form-control @error('name') is-invalid @enderror"
+                                                value="{{ old('name', $printer->name) }}" required>
                                             @error('name')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
 
-                                    {{-- Email --}}
-                                    <div class="col-sm-6">
+                                    <!-- Type -->
+                                    <div class="col-sm-6 pl-sm-0 pr-sm-3">
                                         <div class="form-group">
-                                            <label for="email">Email <span style="color: red;">*</span></label>
-                                            <input type="text" class="form-control @error('email') is-invalid @enderror"
-                                                name="email" id="email" value="{{ old('email', $subAdmin->email) }}"
-                                                placeholder="Enter email">
-                                            @error('email')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    {{-- Role --}}
-                                    <div class="col-sm-6">
-                                        <div class="form-group">
-                                            <label for="role">Role <span style="color: red;">*</span></label>
-                                            <select name="role" id="role"
-                                                class="form-control @error('role') is-invalid @enderror">
-                                                <option value="" disabled>-- Select Role --</option>
-                                                @foreach ($roles as $role)
-                                                    <option value="{{ $role->id }}"
-                                                        {{ old('role', $currentRoleId) == $role->id ? 'selected' : '' }}>
-                                                        {{ $role->name }}
-                                                    </option>
-                                                @endforeach
+                                            <label for="type">Printer Type <span style="color:red">*</span></label>
+                                            <select name="type" id="type"
+                                                class="form-control @error('type') is-invalid @enderror" required>
+                                                <option value="" disabled>-- Select Type --</option>
+                                                <option value="windows" {{ old('type', $printer->type) == 'windows' ? 'selected' : '' }}>Windows</option>
+                                                <option value="network" {{ old('type', $printer->type) == 'network' ? 'selected' : '' }}>Network</option>
+                                                <option value="serial" {{ old('type', $printer->type) == 'serial' ? 'selected' : '' }}>Serial</option>
+                                                <option value="linux_usb" {{ old('type', $printer->type) == 'linux_usb' ? 'selected' : '' }}>Linux USB</option>
                                             </select>
-                                            @error('role')
+                                            @error('type')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
 
-                                    {{-- Image --}}
-                                    <div class="col-sm-6">
+                                    <!-- Connector Value -->
+                                    <div class="col-sm-6 pl-sm-0 pr-sm-3">
                                         <div class="form-group">
-                                            <label for="image">Image (Optional)</label>
-                                            <input type="file" class="form-control @error('image') is-invalid @enderror"
-                                                name="image" id="image">
-                                            <small class="text-danger">Note: Maximum size is 2MB</small>
-                                            @if ($subAdmin->image)
-                                                <div class="mt-2">
-                                                    <img src="{{ asset($subAdmin->image) }}" width="100">
-                                                </div>
-                                            @endif
-                                            @error('image')
+                                            <label for="connector_value">Connector Value <span style="color:red">*</span></label>
+                                            <input type="text" name="connector_value" id="connector_value"
+                                                class="form-control @error('connector_value') is-invalid @enderror"
+                                                value="{{ old('connector_value', $printer->connector_value) }}" required>
+                                            @error('connector_value')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
 
-                                    <!-- Password Field -->
-                                    <div class="col-sm-6 pl-sm-0 pr-sm-3" style="margin-left: 15px;">
-                                        <div class="form-group position-relative">
-                                            <label for="password">Password (Optional)</label>
-                                            <input type="password"
-                                                class="form-control @error('password') is-invalid @enderror" id="password"
-                                                name="password" placeholder="Password"
-                                                value="{{ $subAdmin->plain_password }}">
-
-                                            <span class="fa fa-eye position-absolute toggle-password"
-                                                style="top: 42px; right: 15px; cursor: pointer;"></span>
+                                    <!-- Section -->
+                                    <div class="col-sm-6 pl-sm-0 pr-sm-3">
+                                        <div class="form-group">
+                                            <label for="section">Section <span style="color:red">*</span></label>
+                                            <input type="text" name="section" id="section"
+                                                class="form-control @error('section') is-invalid @enderror"
+                                                value="{{ old('section', $printer->section) }}">
+                                            @error('section')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
                                         </div>
                                     </div>
+
+                                    
 
                                 </div>
 
                                 <div class="card-footer text-center">
                                     <button type="submit" class="btn btn-primary">Save Changes</button>
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -117,22 +98,8 @@
 
     <script>
         $(document).ready(function() {
-            // Toggle password visibility
-            $('.toggle-password').on('click', function() {
-                const $passwordInput = $('#password');
-                const $icon = $(this);
-
-                if ($passwordInput.attr('type') === 'password') {
-                    $passwordInput.attr('type', 'text');
-                    $icon.removeClass('fa-eye').addClass('fa-eye-slash');
-                } else {
-                    $passwordInput.attr('type', 'password');
-                    $icon.removeClass('fa-eye-slash').addClass('fa-eye');
-                }
-            });
-
             // Hide validation errors on focus
-            $('input, select, textarea').on('focus', function() {
+            $('input, select').on('focus', function() {
                 const $feedback = $(this).siblings('.invalid-feedback');
                 if ($feedback.length) {
                     $feedback.hide();

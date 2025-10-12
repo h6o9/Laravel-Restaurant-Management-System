@@ -53,6 +53,17 @@
 
 
 
+			{{--  Printers --}}
+
+			@if (Auth::guard('admin')->check() ||
+					($sideMenuPermissions->has('Printers') && $sideMenuPermissions['Printers']->contains('view')))
+				<li class="dropdown {{ request()->is('admin/printers*') ? 'active' : '' }}">
+					<a href="{{ url('admin/printers') }}" class="nav-link">
+						<i data-feather="printer"></i>
+						<span>Printers</span>
+					</a>
+				</li>
+				 @endif
 
 
 

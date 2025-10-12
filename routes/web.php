@@ -10,18 +10,19 @@ use App\Http\Controllers\WebController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\SeoController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\BrandsController;
 use App\Http\Controllers\Admin\ContactController;
+use App\Http\Controllers\Admin\TestingController;
 use App\Http\Controllers\Admin\SecurityController;
 use App\Http\Controllers\Admin\SubAdminController;
 use App\Http\Controllers\Admin\OrderTokenController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\RolePermissionController;
-use App\Http\Controllers\Admin\PrinterController;
 
 
 /*
@@ -73,14 +74,16 @@ Route::prefix('admin')->middleware(['admin', 'check.subadmin.status'])->group(fu
 	Route::get('/roles-permissions/{id}', [RoleController::class, 'permissions'])->name('role.permissions')->middleware('check.permission:Roles,edit');
 
 
+	Route::get('/test', [TestingController::class, 'index']);
+
 // ✅ Printer Routes (inside admin middleware group)
-Route::get('/printers', [PrinterController::class, 'index'])->name('printers.index');                // All printers
-Route::get('/printers/create', [PrinterController::class, 'create'])->name('printers.create');       // Create form
-Route::post('/printers/store', [PrinterController::class, 'store'])->name('printers.store');         // Store printer
-Route::get('/printers/edit/{id}', [PrinterController::class, 'edit'])->name('printers.edit');        // Edit form
-Route::put('/printers/update/{id}', [PrinterController::class, 'update'])->name('printers.update');  // Update printer
-Route::delete('/printers/delete/{id}', [PrinterController::class, 'destroy'])->name('printers.destroy'); // Delete printer
-Route::post('/printers/toggle-status', [PrinterController::class, 'toggleStatus'])->name('printers.toggleStatus');
+Route::get('/printers', [DeviceController::class, 'index'])->name('printers.index');                // All printers
+Route::get('/printers/create', [DeviceController::class, 'create'])->name('printers.create');       // Create form
+Route::post('/printers/store', [DeviceController::class, 'store'])->name('printers.store');         // Store printer
+Route::get('/printers/edit/{id}', [DeviceController::class, 'edit'])->name('printers.edit');        // Edit form
+Route::put('/printers/update/{id}', [DeviceController::class, 'update'])->name('printers.update');  // Update printer
+Route::delete('/printers/delete/{id}', [DeviceController::class, 'destroy'])->name('printers.destroy'); // Delete printer
+Route::post('/printers/toggle-status', [DeviceController::class, 'toggleStatus'])->name('printers.toggleStatus');
 	//////////////////////////////////////////
 	Route::post('/admin/roles/{id}/permissions/store', [RoleController::class, 'storePermissions'])->name('roles.permissions.store')->middleware('check.permission:role,create');
 
