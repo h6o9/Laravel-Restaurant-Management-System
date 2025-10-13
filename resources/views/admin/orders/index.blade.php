@@ -8,15 +8,16 @@
             <div class="row">
                 <div class="col-12">
                     <div class="card">
-                        <div class="card-header">
+                        <div class="card-header d-flex justify-content-between align-items-center">
                             <h4>Orders List</h4>
+                            <a href="{{ route('orders.create') }}" class="btn btn-primary">Create Order</a>
                         </div>
                         <div class="card-body table-striped table-bordered table-responsive">
-                            <a href="{{ route('orders.create') }}" class="btn btn-primary mb-3">Create Order</a>
                             <table class="table" id="orders_table">
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>Order No</th>
                                         <th>Table No</th>
                                         <th>Section</th>
                                         <th>Status</th>
@@ -29,8 +30,9 @@
                                     @foreach($orders as $order)
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
+                                            <td>{{ $order->order_no }}</td>
                                             <td>{{ $order->table_no }}</td>
-                                            <td>{{ $order->section->name ?? 'N/A' }}</td>
+                                            <td>{{ ucfirst($order->section) }}</td>
                                             <td>
                                                 @if($order->status == 'pending')
                                                     <span class="badge badge-warning">Pending</span>
@@ -42,9 +44,7 @@
                                             </td>
                                             <td>{{ $order->description ?? '—' }}</td>
                                             <td>
-                                                @foreach($order->items as $item)
-                                                    <div>- {{ $item['name'] }} x {{ $item['quantity'] }}</div>
-                                                @endforeach
+                                                <div>- {{ $order->items }} x {{ $order->quantities }}</div>
                                             </td>
                                             <td>
                                                 <div class="d-flex">
@@ -73,7 +73,6 @@
     </section>
 </div>
 @endsection
-
 
 @section('js')
 <script>

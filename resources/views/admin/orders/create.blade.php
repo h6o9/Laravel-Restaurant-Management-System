@@ -11,93 +11,65 @@
             <form id="create_order" action="{{ route('orders.store') }}" method="POST">
                 @csrf
                 <div class="row">
-                    <div class="col-12 col-md-12 col-lg-12">
-                        <div class="card">
-                            <h4 class="text-center my-4">Create New Order</h4>
+                    <div class="col-12">
+                        <div class="card shadow">
+                            <h4 class="text-center my-4">🧾 Create New Order</h4>
 
                             <div class="row mx-0 px-4">
 
-                                <!-- Order Number -->
-                                <div class="col-sm-6">
+                                <!-- Order No -->
+                                <!-- <div class="col-sm-6">
                                     <div class="form-group">
                                         <label for="order_no">Order No <span style="color:red">*</span></label>
-                                        <input type="text" name="order_no" id="order_no"
-                                            class="form-control @error('order_no') is-invalid @enderror"
-                                            placeholder="Enter Order Number" required>
-                                        @error('order_no')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
+                                        <input type="text" name="order_no" id="order_no" class="form-control" placeholder="Enter Order Number" required>
                                     </div>
-                                </div>
+                                </div> -->
 
-                                <!-- Table Number -->
+                                <!-- Table No -->
                                 <div class="col-sm-6">
                                     <div class="form-group">
                                         <label for="table_no">Table No <span style="color:red">*</span></label>
-                                        <input type="text" name="table_no" id="table_no"
-                                            class="form-control @error('table_no') is-invalid @enderror"
-                                            placeholder="Enter Table Number" required>
-                                        @error('table_no')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
+                                        <input type="text" name="table_no" id="table_no" class="form-control" placeholder="Enter Table Number" required>
                                     </div>
                                 </div>
 
-                                <!-- Section Selector -->
+                                <!-- Section -->
                                 <div class="col-sm-6">
                                     <div class="form-group">
                                         <label for="section">Select Section <span style="color:red">*</span></label>
-
-                                        @if($sections->isNotEmpty())
-                                            <select name="section" id="section"
-                                                class="form-control @error('section') is-invalid @enderror" required>
-                                                <option value="" disabled selected>-- Select Section --</option>
-                                                @foreach($sections as $section)
-                                                    <option value="{{ $section->section }}">
-                                                        {{ ucfirst($section->section) }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        @else
-                                            <div class="alert alert-warning py-2 mb-0">
-                                                <strong>⚠ Please add printer device first.</strong>
-                                            </div>
-                                        @endif
-
-                                        @error('section')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
+                                        <select name="section" id="section" class="form-control" required>
+                                            <option value="" disabled selected>-- Select Section --</option>
+                                            @foreach($sections as $section)
+                                                <option value="{{ $section->section }}">{{ ucfirst($section->section) }}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                 </div>
 
-                               <!-- Items Multi Select -->
-<div class="col-sm-12">
-    <div class="form-group">
-        <label for="items">Select Items <span style="color:red">*</span></label>
-        <select id="items" name="items[]" class="form-control" multiple required>
-            @foreach($menuItems as $item)
-                <option value="{{ $item->id }}">{{ $item->name }}</option>
-            @endforeach
-        </select>
-    </div>
-</div>
+                                <!-- Items Searchable Dropdown -->
+                                <div class="col-sm-12">
+                                    <div class="form-group position-relative">
+                                        <label>Select Items <span style="color:red">*</span></label>
+                                        <input type="text" id="item_search" class="form-control" placeholder="Search & click to add item">
+                                        <ul id="item_list" class="list-group position-absolute w-100 shadow-sm" style="z-index:10; display:none; max-height:200px; overflow-y:auto;">
+                                            @foreach($menuItems as $item)
+                                                <li class="list-group-item list-item" data-id="{{ $item->id }}" data-name="{{ $item->name }}">
+                                                    {{ $item->name }}
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                </div>
 
-<!-- Quantity Fields (Dynamic) -->
-<div id="quantity_fields" class="col-sm-12">
-</div>
-
+                                <!-- Selected Items List -->
+                                <div class="col-sm-12 mb-3">
+                                    <ul id="selected_items" class="list-group"></ul>
+                                </div>
 
                                 <!-- Description -->
-                                <div class="col-sm-12">
-                                    <div class="form-group">
-                                        <label for="description">Description (Optional)</label>
-                                        <textarea name="description" id="description" rows="3"
-                                            class="form-control @error('description') is-invalid @enderror"
-                                            placeholder="Additional notes..."></textarea>
-                                        @error('description')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
+                                <div class="col-sm-12 mb-3">
+                                    <label>Description (Optional)</label>
+                                    <textarea name="description" id="description" rows="3" class="form-control" placeholder="Additional notes..."></textarea>
                                 </div>
 
                                 <!-- Preview -->
@@ -128,26 +100,54 @@
 $(document).ready(function() {
     const userType = "{{ auth()->user()->type ?? 'N/A' }}";
 
-    // Handle item selection & quantity input
-    $('#items').on('change', function() {
-        const selected = $(this).val() || [];
-        const container = $('#quantity_inputs');
-        container.empty();
-
-        selected.forEach(item => {
-            container.append(`
-                <div class="d-flex align-items-center mb-2">
-                    <label class="mr-2 mb-0" style="width:100px">${item}:</label>
-                    <input type="number" name="quantities[${item}]" min="1" value="1" class="form-control w-25 item-qty" required>
-                </div>
-            `);
+    // Show item list on focus
+    $('#item_search').on('focus input', function() {
+        const search = $(this).val().toLowerCase();
+        $('#item_list').show();
+        $('#item_list li').each(function() {
+            const name = $(this).text().toLowerCase();
+            $(this).toggle(name.includes(search));
         });
+    });
 
+    // Hide list when clicked outside
+    $(document).click(function(e) {
+        if (!$(e.target).closest('#item_search, #item_list').length) {
+            $('#item_list').hide();
+        }
+    });
+
+    // Add item to selected list
+    $('#item_list').on('click', '.list-item', function() {
+        const id = $(this).data('id');
+        const name = $(this).data('name');
+
+        if ($(`#selected_items li[data-id="${id}"]`).length === 0) {
+            $('#selected_items').append(`
+                <li class="list-group-item d-flex justify-content-between align-items-center" data-id="${id}">
+                    <span>${name}</span>
+                    <div class="d-flex align-items-center">
+                        <input type="number" name="quantities[${id}]" min="1" value="1"
+                            class="form-control form-control-sm w-25 mr-2 qty-input" required>
+                        <button type="button" class="btn btn-danger btn-sm remove-item">×</button>
+                    </div>
+                </li>
+            `);
+        }
+
+        $('#item_search').val('');
+        $('#item_list').hide();
         updatePreview();
     });
 
-    // Live preview for all fields
-    $('input, textarea, select').on('input change', function() {
+    // Remove item
+    $(document).on('click', '.remove-item', function() {
+        $(this).closest('li').remove();
+        updatePreview();
+    });
+
+    // Update preview on any input change
+    $(document).on('input change', 'input, textarea, select', function() {
         updatePreview();
     });
 
@@ -159,8 +159,8 @@ $(document).ready(function() {
         const now = new Date().toLocaleString();
 
         let itemsPreview = '';
-        $('#quantity_inputs .d-flex').each(function() {
-            const name = $(this).find('label').text().replace(':', '');
+        $('#selected_items li').each(function() {
+            const name = $(this).find('span').text();
             const qty = $(this).find('input').val();
             itemsPreview += `<li>${name} — Qty: ${qty}</li>`;
         });

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Models\MenuItem;
 use App\Models\Printer;
 use App\Models\Section;
 
@@ -13,7 +14,7 @@ class OrderTokenController extends Controller
     //
 	public function index()
     {
-        $orders = Order::latest()->get();
+        $orders = Order::all();
         return view('admin.orders.index', compact('orders'));
     }
 
@@ -26,40 +27,87 @@ class OrderTokenController extends Controller
         ->distinct()
         ->get();
 
-		$menuItems = [
-    (object)['id' => 1, 'name' => 'Burger'],
-    (object)['id' => 2, 'name' => 'Pizza'],
-    (object)['id' => 3, 'name' => 'Pasta'],
-];
+		$menuItems = MenuItem::all();
     return view('admin.orders.create', compact('sections', 'menuItems'));
 }
 
 
-	public function store(Request $request)
+// 	public function store(Request $request)
+// {
+// 	return $request->all();
+//     $request->validate([
+//         'table_no' => 'required',
+//         'section_id' => 'required',
+//         'items' => 'required|string',
+//     ]);
+
+//     $order = Order::create([
+//         'table_no' => $request->table_no,
+//         'section_id' => $request->section_id,
+//         'description' => $request->description,
+//         'items' => $request->items,
+//         'status' => 'pending',
+//     ]);
+
+//     // Print send logic
+//     $section = Section::find($request->section_id);
+//     if ($section->name === 'Kitchen') {
+//         \App\Helpers\PrintHelper::printKitchenOrder($order);
+//     } elseif ($section->name === 'Cold Bar') {
+//         \App\Helpers\PrintHelper::printColdBarOrder($order);
+//     }
+
+//     return redirect()->back()->with('success', 'Order sent for preparation successfully!');
+// }
+public function store(Request $request)
 {
     $request->validate([
-        'table_no' => 'required',
-        'section_id' => 'required',
-        'items' => 'required|string',
+        'table_no'   => 'required|string|max:255',
+        'section'    => 'required|string|max:100',
+        'quantities' => 'required|array', // e.g. ['1' => 2, '3' => 5] where keys = menu_item IDs
     ]);
 
-    $order = Order::create([
-        'table_no' => $request->table_no,
-        'section_id' => $request->section_id,
-        'description' => $request->description,
-        'items' => $request->items,
-        'status' => 'pending',
-    ]);
+    $user = auth()->user();
 
-    // Print send logic
-    $section = Section::find($request->section_id);
-    if ($section->name === 'Kitchen') {
-        \App\Helpers\PrintHelper::printKitchenOrder($order);
-    } elseif ($section->name === 'Cold Bar') {
-        \App\Helpers\PrintHelper::printColdBarOrder($order);
+    // ✅ Generate one order number for all items
+    $orderNo = 'ORD-' . strtoupper(uniqid());
+
+    foreach ($request->quantities as $itemId => $qty) {
+        // ✅ Find item name from menu_items table
+        $menuItem = \App\Models\MenuItem::find($itemId);
+
+        if (!$menuItem) {
+            // Skip or handle missing item safely
+            continue;
+        }
+
+        // ✅ Create order row for each item
+        \App\Models\Order::create([
+            'order_no'   => $orderNo,
+            'table_no'   => $request->table_no,
+            'section'    => $request->section,
+            'items'      => $menuItem->name,  // Store item name, not ID
+            'quantities' => $qty,              // Store quantity
+            'status'     => 'pending',
+            'created_by' => ($user && $user->role === 'subadmin') ? $user->name : 'Admin',
+            'description'=> $request->description,
+        ]);
     }
 
-    return redirect()->back()->with('success', 'Order sent for preparation successfully!');
+    
+    // ✅ Fix printing: pass Order model (singular)
+    $section = strtolower($request->section);
+    $orderForPrint = \App\Models\Order::where('order_no', $orderNo)->first(); // First row
+
+    if ($orderForPrint) {
+        if ($section === 'kitchen') {
+            \App\Helpers\PrintHelper::printKitchenOrder($orderForPrint);
+        } elseif ($section === 'cold_bar') {
+            \App\Helpers\PrintHelper::printColdBarOrder($orderForPrint);
+        }
+    }
+
+return redirect()->route('orders.index')->with('success', 'Order sent for preparation successfully!');
 }
 
 
@@ -112,7 +160,7 @@ public function destroy(Request $request, Order $order)
         'reason' => 'required|string|max:255',
     ]);
 
-    $section = Section::find($order->section_id);
+    $section = Section::find($order->section);
     $orderDetails = $order->toArray();
     $reason = $request->reason;
 
